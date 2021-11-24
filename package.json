@@ -1,10 +1,10 @@
 {
-	"name": "fcc-issue-tracker",
+	"name": "issue-tracker",
 	"version": "1.0.0",
-	"description": "Issue Tracker Boilerplate",
-	"main": "server.js",
+	"description": "Issue Tracker",
+	"main": "app.js",
 	"scripts": {
-		"start": "node server.js",
+		"start": "node app.js",
 		"test": "mocha --timeout 5000 --recursive --exit --ui tdd tests/"
 	},
 	"dependencies": {
@@ -18,7 +18,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/freeCodeCamp/boilerplate-project-issuetracker"
+		"url": "https://github.com/ElliotFriend/issuetracker"
 	},
 	"keywords": [
 		"node",
