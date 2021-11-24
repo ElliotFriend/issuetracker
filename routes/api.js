@@ -28,13 +28,24 @@ const updateIssue = async (issueBody, done) => {
   })
 }
 
+const getProjectIssues = async (project, done) => {
+  let dbQuery = Issue.find({ project: project })
+  dbQuery.exec((err, data) => {
+    if (err) return console.log(err)
+    done(null, data)
+  })
+}
+
 module.exports = (app) => {
 
   app.route('/api/issues/:project')
 
     .get(async (req, res) => {
       let project = req.params.project;
-      // let dbQuery = Issue.find({ project: project })
+      let projectIssues = getProjectIssues(project, async (err, data) => {
+        if (err) return console.log(err)
+        res.json(data)
+      })
     })
 
     .post(async (req, res) => {
@@ -62,7 +73,10 @@ module.exports = (app) => {
     .put(async (req, res) => {
       let project = req.params.project;
       let doc = await updateIssue(req.body, (err, data) => {
-        if (err) return console.log(err)
+        if (err) return res.json({
+          error: 'count not update',
+          _id: req.body._id,
+        })
         res.json({
           status: 'updated successfully',
           _id: req.body._id,

@@ -37,29 +37,29 @@
     <script>
       $(function() {
         let currentProject = window.location.pathname.replace(/\//g, "");;
-        let url = "/api/issues/"+currentProject;
-        $('#projectTitle').text('All issues for: '+currentProject)
+        let url = `/api/issues/${currentProject}`;
+        $('#projectTitle').text(`All issues for: ${currentProject}`)
         $.ajax({
           type: "GET",
           url: url,
           success: function(data)
           {
             let issues= [];
-            data.forEach(function(ele) {
-              console.log(ele);
+            data.forEach((item) => {
+              console.log(item);
               let openstatus;
-              (ele.open) ? openstatus = 'open' : openstatus = 'closed';
+              (item.open) ? openstatus = 'open' : openstatus = 'closed';
               let single = [
                 '<div class="issue '+openstatus+'">',
-                '<p class="id">id: '+ele._id+'</p>',
-                '<h3>'+ele.issue_title+' -  ('+openstatus+')</h3>',
+                '<p class="id">id: '+item._id+'</p>',
+                '<h3>'+item.issue_title+' -  ('+openstatus+')</h3>',
                 '<br>',
-                '<p>'+ele.issue_text+'</p>',
-                '<p>'+ele.status_text+'</p>',
+                '<p>'+item.issue_text+'</p>',
+                '<p>'+item.status_text+'</p>',
                 '<br>',
-                '<p class="id"><b>Created by:</b> '+ele.created_by+'  <b>Assigned to:</b> '+ele.assigned_to,
-                '<p class="id"><b>Created on:</b> '+ele.created_on+'  <b>Last updated:</b> '+ele.updated_on,
-                '<br><a href="#" class="closeIssue" id="'+ele._id+'">close?</a> <a href="#" class="deleteIssue" id="'+ele._id+'">delete?</a>',
+                '<p class="id"><b>Created by:</b> '+item.created_by+'  <b>Assigned to:</b> '+item.assigned_to,
+                '<p class="id"><b>Created on:</b> '+item.created_on+'  <b>Last updated:</b> '+item.updated_on,
+                '<br><a href="#" class="closeIssue" id="'+item._id+'">close?</a> <a href="#" class="deleteIssue" id="'+item._id+'">delete?</a>',
                 '</div>'
                 
               ];
@@ -71,7 +71,7 @@
         
         $('#newIssue').submit(function(e){
           e.preventDefault();
-          $(this).attr('action', "/api/issues/" + currentProject);
+          $(this).attr('action', `/api/issues/${currentProject}`);
           $.ajax({
             type: "POST",
             url: url,
@@ -81,7 +81,7 @@
         });
         
         $('#issueDisplay').on('click','.closeIssue', function(e) {
-          let url = "/api/issues/"+currentProject;
+          let url = `/api/issues/${currentProject}`;
           $.ajax({
             type: "PUT",
             url: url,
@@ -91,7 +91,7 @@
           e.preventDefault();
         });
         $('#issueDisplay').on('click','.deleteIssue', function(e) {
-          let url = "/api/issues/"+currentProject;
+          let url = `/api/issues/${currentProject}`;
           $.ajax({
             type: "DELETE",
             url: url,
