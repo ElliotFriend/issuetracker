@@ -28,8 +28,15 @@ const updateIssue = async (issueBody, done) => {
   })
 }
 
-const getProjectIssues = async (project, done) => {
-  let dbQuery = Issue.find({ project: project })
+const getProjectIssues = async (project, query, done) => {
+  let dbFilter = { project: project, }
+  if (query) {
+    for (let v in query) {
+      dbFilter[v] = query[v]
+    }
+  }
+  let dbQuery = Issue.find(dbFilter)
+    .select({ project: 0, __v: 0})
   dbQuery.exec((err, data) => {
     if (err) return console.log(err)
     done(null, data)
@@ -42,7 +49,7 @@ module.exports = (app) => {
 
     .get(async (req, res) => {
       let project = req.params.project;
-      let projectIssues = getProjectIssues(project, async (err, data) => {
+      let projectIssues = getProjectIssues(project, req.query, async (err, data) => {
         if (err) return console.log(err)
         res.json(data)
       })
@@ -50,7 +57,11 @@ module.exports = (app) => {
 
     .post(async (req, res) => {
       let project = req.params.project;
-      console.log(req.body)
+      if (req.body.issue_title === '' || req.body.issue_text === '' || req.body.created_by === '') {
+        return res.json({
+          error: 'required field(s) missing',
+        })
+      }
       let doc = await createIssue({
         ...req.body,
         project: project,
