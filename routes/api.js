@@ -15,8 +15,23 @@ const createIssue = async (issueBody, done) => {
   })
 }
 
+const getProjectIssues = async (project, query, done) => {
+  let dbFilter = { project: project, }
+  if (query) {
+    for (let v in query) {
+      dbFilter[v] = query[v]
+    }
+  }
+  let dbQuery = Issue.find(dbFilter)
+    .select({ project: 0, __v: 0})
+  dbQuery.exec((err, data) => {
+    if (err) return console.log(err)
+    done(null, data)
+  })
+}
+
 const updateIssue = async (issueBody, done) => {
-  let issue = await Issue.findById(issueBody._id)
+  let issue = Issue.findById(issueBody._id)
   for (let v in issueBody) {
     if (issueBody[v] !== '' && v !== '_id') {
       issue[v] = issueBody[v]
@@ -28,16 +43,8 @@ const updateIssue = async (issueBody, done) => {
   })
 }
 
-const getProjectIssues = async (project, query, done) => {
-  let dbFilter = { project: project, }
-  if (query) {
-    for (let v in query) {
-      dbFilter[v] = query[v]
-    }
-  }
-  let dbQuery = Issue.find(dbFilter)
-    .select({ project: 0, __v: 0})
-  dbQuery.exec((err, data) => {
+const deleteIssue = async (id, done) => {
+  let doc = Issue.findOneAndDelete({_id: id}, (err, data) => {
     if (err) return console.log(err)
     done(null, data)
   })
@@ -83,35 +90,36 @@ module.exports = (app) => {
 
     .put(async (req, res) => {
       let project = req.params.project;
+      if (!req.body._id) return res.json({
+        error: 'missing _id',
+      })
       let doc = await updateIssue(req.body, (err, data) => {
         if (err) return res.json({
           error: 'count not update',
           _id: req.body._id,
         })
         res.json({
-          status: 'updated successfully',
+          result: 'successfully updated',
           _id: req.body._id,
         })
       })
-      // let issue = await Issue.findById(req.body._id)
-      //
-      // for (let v in req.body) {
-      //   if (req.body[v] !== '' && v !== '_id') {
-      //     issue[v] = req.body[v]
-      //   }
-      // }
-      // issue.save( (err, data) => {
-      //   if (err) return console.log(err)
-      //   // done(null, data)
-      // })
-      // let issue = await findSingleIssue(req.body._id)
-      // console.log(req.body)
-      // let doc = updateIssue(req.body)
     })
 
     .delete(async (req, res) => {
       let project = req.params.project;
-
+      if (!req.body._id) return res.json({
+        error: 'missing _id',
+      })
+      let doc = await deleteIssue(req.body._id, (err, data) => {
+        if (err) return res.json({
+          error: 'could not delete',
+          _id: req.body._id,
+        })
+        res.json({
+          result: 'successfully deleted',
+          _id: req.body._id,
+        })
+      })
     });
 
 };
