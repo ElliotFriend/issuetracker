@@ -10,14 +10,6 @@ const issueSchema = new Schema({
     type: String,
     required: true,
   },
-  created_on: {
-    type: Date,
-    default: Date.now,
-  },
-  updated_on: {
-    type: Date,
-    default: Date.now,
-  },
   created_by: {
     type: String,
     required: true,
@@ -35,6 +27,12 @@ const issueSchema = new Schema({
   project: {
     type: String,
     required: true,
+  },
+},
+{
+  timestamps: {
+    createdAt: 'created_on',
+    updatedAt: 'updated_on',
   },
 })
 
