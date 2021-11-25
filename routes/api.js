@@ -31,16 +31,20 @@ const getProjectIssues = async (project, query, done) => {
 }
 
 const updateIssue = async (issueBody, done) => {
-  let issue = Issue.findById(issueBody._id)
+  let update = {}
   for (let v in issueBody) {
     if (issueBody[v] !== '' && v !== '_id') {
-      issue[v] = issueBody[v]
+      update[v] = issueBody[v]
     }
   }
-  issue.save( (err, data) => {
+  let issue = Issue.findByIdAndUpdate(issueBody._id, update, (err, data) => {
     if (err) return console.log(err)
     done(null, data)
   })
+  // issue.save( (err, data) => {
+  //   if (err) return console.log(err)
+  //   done(null, data)
+  // })
 }
 
 const deleteIssue = async (id, done) => {
@@ -64,7 +68,8 @@ module.exports = (app) => {
 
     .post(async (req, res) => {
       let project = req.params.project;
-      if (req.body.issue_title === '' || req.body.issue_text === '' || req.body.created_by === '') {
+      console.log(req.body)
+      if (!req.body.issue_title || !req.body.issue_text || !req.body.created_by) {
         return res.json({
           error: 'required field(s) missing',
         })
@@ -90,8 +95,13 @@ module.exports = (app) => {
 
     .put(async (req, res) => {
       let project = req.params.project;
+      console.log(req.body)
       if (!req.body._id) return res.json({
         error: 'missing _id',
+      })
+      if (Object.keys(req.body).length === 1) return res.json({
+        error: 'no update field(s) sent',
+        _id: req.body._id,
       })
       let doc = await updateIssue(req.body, (err, data) => {
         if (err) return res.json({
