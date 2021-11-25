@@ -120,11 +120,14 @@ module.exports = (app) => {
       if (!req.body._id) return res.json({
         error: 'missing _id',
       })
+      let errorObject = {
+        error: 'could not delete',
+        _id: req.body._id,
+      }
+      if (Object.keys(req.body).length > 1) return res.json(errorObject)
       let doc = await deleteIssue(req.body._id, (err, data) => {
-        if (err) return res.json({
-          error: 'could not delete',
-          _id: req.body._id,
-        })
+        if (err || !data) return res.json(errorObject)
+        // console.log(data)
         res.json({
           result: 'successfully deleted',
           _id: req.body._id,
