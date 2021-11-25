@@ -79,16 +79,17 @@ module.exports = (app) => {
         project: project,
       }, (err, data) => {
         if (err) return console.log(err)
+        // console.log(data)
         res.json({
-          assigned_to: data._doc.assigned_to,
-          status_text: data._doc.status_text,
-          open: data._doc.open,
-          _id: data._doc._id,
-          issue_title: data._doc.issue_title,
-          issue_text: data._doc.issue_text,
-          created_by: data._doc.created_by,
-          created_on: data._doc.created_on,
-          updated_on: data._doc.updated_on,
+          assigned_to: data.assigned_to || '',
+          status_text: data.status_text || '',
+          open: data.open,
+          _id: data._id,
+          issue_title: data.issue_title,
+          issue_text: data.issue_text,
+          created_by: data.created_by,
+          created_on: data.created_on,
+          updated_on: data.updated_on,
         })
       })
     })
