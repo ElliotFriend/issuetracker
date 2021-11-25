@@ -68,7 +68,7 @@ module.exports = (app) => {
 
     .post(async (req, res) => {
       let project = req.params.project;
-      console.log(req.body)
+      // console.log(req.body)
       if (!req.body.issue_title || !req.body.issue_text || !req.body.created_by) {
         return res.json({
           error: 'required field(s) missing',
@@ -95,7 +95,7 @@ module.exports = (app) => {
 
     .put(async (req, res) => {
       let project = req.params.project;
-      console.log(req.body)
+      // console.log(req.body)
       if (!req.body._id) return res.json({
         error: 'missing _id',
       })
@@ -103,11 +103,13 @@ module.exports = (app) => {
         error: 'no update field(s) sent',
         _id: req.body._id,
       })
+      let errorObject = {
+        error: 'could not update',
+        _id: req.body._id,
+      }
       let doc = await updateIssue(req.body, (err, data) => {
-        if (err) return res.json({
-          error: 'could not update',
-          _id: req.body._id,
-        })
+        if (err || !data) return res.json(errorObject)
+        // console.log(data)
         res.json({
           result: 'successfully updated',
           _id: req.body._id,
