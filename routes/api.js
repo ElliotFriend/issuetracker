@@ -95,7 +95,7 @@ module.exports = (app) => {
       })
       let doc = await updateIssue(req.body, (err, data) => {
         if (err) return res.json({
-          error: 'count not update',
+          error: 'could not update',
           _id: req.body._id,
         })
         res.json({
