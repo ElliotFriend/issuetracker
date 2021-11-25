@@ -13,6 +13,7 @@ const issueSchema = new Schema({
   },
   assigned_to: {
     type: String,
+    default: '',
   },
   open: {
     type: Boolean,
@@ -20,6 +21,7 @@ const issueSchema = new Schema({
   },
   status_text: {
     type: String,
+    default: '',
   },
   project: {
     type: String,

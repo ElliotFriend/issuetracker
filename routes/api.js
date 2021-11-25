@@ -81,8 +81,8 @@ module.exports = (app) => {
         if (err) return console.log(err)
         // console.log(data)
         res.json({
-          assigned_to: data.assigned_to || '',
-          status_text: data.status_text || '',
+          assigned_to: data.assigned_to,
+          status_text: data.status_text,
           open: data.open,
           _id: data._id,
           issue_title: data.issue_title,
