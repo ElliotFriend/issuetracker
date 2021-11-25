@@ -41,10 +41,6 @@ const updateIssue = async (issueBody, done) => {
     if (err) return console.log(err)
     done(null, data)
   })
-  // issue.save( (err, data) => {
-  //   if (err) return console.log(err)
-  //   done(null, data)
-  // })
 }
 
 const deleteIssue = async (id, done) => {
@@ -68,7 +64,6 @@ module.exports = (app) => {
 
     .post(async (req, res) => {
       let project = req.params.project;
-      // console.log(req.body)
       if (!req.body.issue_title || !req.body.issue_text || !req.body.created_by) {
         return res.json({
           error: 'required field(s) missing',
@@ -79,7 +74,6 @@ module.exports = (app) => {
         project: project,
       }, (err, data) => {
         if (err) return console.log(err)
-        // console.log(data)
         res.json({
           assigned_to: data.assigned_to,
           status_text: data.status_text,
@@ -96,7 +90,6 @@ module.exports = (app) => {
 
     .put(async (req, res) => {
       let project = req.params.project;
-      // console.log(req.body)
       if (!req.body._id) return res.json({
         error: 'missing _id',
       })
@@ -110,7 +103,6 @@ module.exports = (app) => {
       }
       let doc = await updateIssue(req.body, (err, data) => {
         if (err || !data) return res.json(errorObject)
-        // console.log(data)
         res.json({
           result: 'successfully updated',
           _id: req.body._id,
@@ -130,7 +122,6 @@ module.exports = (app) => {
       if (Object.keys(req.body).length > 1) return res.json(errorObject)
       let doc = await deleteIssue(req.body._id, (err, data) => {
         if (err || !data) return res.json(errorObject)
-        // console.log(data)
         res.json({
           result: 'successfully deleted',
           _id: req.body._id,
