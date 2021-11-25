@@ -5,34 +5,331 @@ const server = require('../app');
 
 chai.use(chaiHttp);
 
-suite('Functional Tests', function() {
+suite('Functional Tests', function () {
+  this.timeout(5000)
 
-  // Create an issue with every field: POST request to /api/issues/{project}
+  suite('Testing the POST method and responses', () => {
 
-  // Create an issue with only required fields: POST request to /api/issues/{project}
+    test('Create an issue with every field: POST request to /api/issues/{project}', (done) => {
+      let myData = {
+        issue_title: 'Completely made-up title',
+        issue_text: 'Here is a simple issue. It is make-believe!',
+        created_by: 'my own self',
+        assigned_to: 'your mom',
+      }
+      chai
+        .request(server)
+        .post('/api/issues/my-own-test-project')
+        .type('json')
+        .send(myData)
+        .end( (err, res) => {
+          let data = res.body
+          assert.equal(res.status, 200, 'return status should be 200')
+          assert.isObject(data, 'returned object should be an object')
+          assert.nestedInclude(data, myData, 'returned object should include the fields we sent')
+          assert.property(data, 'created_on', 'returned object should have a "created_on" property')
+          assert.isNumber(Date.parse(data.created_on), '"created_on" should successfully parse into a number')
+          assert.property(data, 'updated_on', 'returned object should have a "updated_on" property')
+          assert.isNumber(Date.parse(data.updated_on), '"updated_on" should successfully parse into a number')
+          assert.property(data, 'open', 'returned object should have an "open" property')
+          assert.isBoolean(data.open, 'the "open" property should be a boolean')
+          assert.isTrue(data.open, 'the "open" property should be set to true')
+          assert.property(data, '_id', 'the returned object should have an "_id" property')
+          assert.isNotEmpty(data._id, 'the "_id" property should not be empty')
+          assert.property(data, 'status_text', 'the returned object should have a "status_text" property')
+          assert.isEmpty(data.status_text, 'the "status_text" property should be an empty string')
+          done()
+        })
+    })
 
-  // Create an issue with missing required fields: POST request to /api/issues/{project}
+    test('Create an issue with only required fields: POST request to /api/issues/{project}', (done) => {
+      let myData = {
+        issue_title: 'This is the title',
+        issue_text: 'this is the text',
+        created_by: 'me myself and i',
+      }
+      chai
+        .request(server)
+        .post('/api/issues/my-own-test-project')
+        .type('json')
+        .send(myData)
+        .end( (err, res) => {
+          let data = res.body
+          assert.equal(res.status, 200, 'return status should be 200')
+          assert.isObject(data, 'returned object should be an object')
+          assert.nestedInclude(data, myData, 'returned object should include the fields we sent')
+          assert.property(data, 'created_on', 'returned object should have a "created_on" property')
+          assert.isNumber(Date.parse(data.created_on), '"created_on" should successfully parse into a number')
+          assert.property(data, 'updated_on', 'returned object should have a "updated_on" property')
+          assert.isNumber(Date.parse(data.updated_on), '"updated_on" should successfully parse into a number')
+          assert.property(data, 'open', 'returned object should have an "open" property')
+          assert.isBoolean(data.open, 'the "open" property should be a boolean')
+          assert.isTrue(data.open, 'the "open" property should default to true')
+          assert.property(data, '_id', 'the returned object should have an "_id" property')
+          assert.isNotEmpty(data._id, 'the "_id" property should not be empty')
+          assert.property(data, 'status_text', 'the returned object should have a "status_text" property')
+          assert.isEmpty(data.status_text, 'the "status_text" property should default to an empty string')
+          assert.property(data, 'assigned_to', 'the returned object should have an "assigned_to" property')
+          assert.isEmpty(data.assigned_to, 'the "assigned_to" property should default to an empty string')
+          done()
+        })
+    })
 
-  // View issues on a project: GET request to /api/issues/{project}
+    test('Create an issue with missing required fields: POST request to /api/issues/{project}', (done) => {
+      let myData = {
+        issue_text: 'this will not make it',
+      }
+      chai
+        .request(server)
+        .post('/api/issues/my-own-test-project')
+        .type('json')
+        .send(myData)
+        .end( (err, res) => {
+          let data = res.body
+          assert.isObject(data, 'returned object should be an object')
+          assert.property(data, 'error', 'the returned object should have an "error" property')
+          assert.equal(data.error, 'required field(s) missing')
+          done()
+        })
+    })
+  
+  })
 
-  // View issues on a project with one filter: GET request to /api/issues/{project}
+  suite('Testing the GET method and responses', () => {
 
-  // View issues on a project with multiple filters: GET request to /api/issues/{project}
+    test('View issues on a project: GET request to /api/issues/{project}', (done) => {
+      let myData = {
+        issue_text: 'generic issue text',
+        created_by: 'he who shall not be named',
+      }
+      let project = `my-own-test-project${Date.now().toString().substring(7)}`
+      let url = `/api/issues/${project}`
+      let characters = ['Harry Potter', 'Ron Weasley', 'Hermione Granger']
+      chai
+        .request(server)
+        .post(url)
+        .type('json')
+        .send({ ...myData, issue_title: 'Harry Potter'})
+        .then( (res) => {
+          assert.isObject(res.body)
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .post(url)
+            .type('json')
+            .send({ ...myData, issue_title: 'Ron Weasley'})
+            .then( (res) => {
+              assert.isObject(res.body)
+            })
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .post(url)
+            .type('json')
+            .send({ ...myData, issue_title: 'Hermione Granger'})
+            .then( (res) => {
+              assert.isObject(res.body)
+            })
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .get(url)
+            .end( (err, res) => {
+              let data = res.body
+              assert.isArray(data, 'the returned data should be an array')
+              assert.lengthOf(data, 3, 'the returned array should have 3 elements')
+              data.forEach((issue) => {
+                assert.property(issue, 'issue_title', 'the returned object should contain an "issue_title" property')
+                assert.nestedInclude(characters, issue.issue_title, 'the "issue_title" property should match one of the characters')
+                assert.property(issue, 'issue_text', 'the returned object should contain an "issue_title" property')
+                assert.property(issue, 'created_by', 'the returned object should contain an "created_by" property')
+                assert.property(issue, 'assigned_to', 'the returned object should contain an "assigned_to" property')
+                assert.property(issue, 'status_text', 'the returned object should contain an "status_text" property')
+                assert.property(issue, 'open', 'the returned object should contain an "open" property')
+                assert.property(issue, 'created_on', 'the returned object should contain an "created_on" property')
+                assert.property(issue, 'updated_on', 'the returned object should contain an "updated_on" property')
+                assert.property(issue, '_id', 'the returned object should contain an "_id" property')
+              })
+              done()
+            })
+        })
+        .catch( (err) => {
+          throw err
+        })
+    })
 
-  // Update one field on an issue: PUT request to /api/issues/{project}
+    test('View issues on a project with one filter: GET request to /api/issues/{project}', (done) => {
+      let myData = {
+        issue_text: 'some filtering sample',
+        issue_title: 'Some Filtering Issue',
+      }
+      let project = `my-own-test-project${Date.now().toString().substring(7)}`
+      let url = `/api/issues/${project}`
+      let characters = ['TheMule', 'ThatGaiaLady', 'GaalDornick']
+      chai
+        .request(server)
+        .post(url)
+        .type('json')
+        .send({ ...myData, created_by: 'TheMule', assigned_to: 'Alice' })
+        .then( (res) => {
+          assert.isObject(res.body)
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .post(url)
+            .type('json')
+            .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Bob' })
+            .then( (res) => {
+              assert.isObject(res.body)
+            })
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .post(url)
+            .type('json')
+            .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Alice' })
+            .then( (res) => {
+              assert.isObject(res.body)
+            })
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .post(url)
+            .type('json')
+            .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Bob' })
+            .then( (res) => {
+              assert.isObject(res.body)
+            })
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .post(url)
+            .type('json')
+            .send({ ...myData, created_by: 'GaalDornick', assigned_to: 'Carol' })
+            .then( (res) => {
+              assert.isObject(res.body)
+            })
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .get(url)
+            .query({ created_by: 'ThatGaiaLady' })
+            .end( (err, res) => {
+              let data = res.body
+              assert.isArray(data, 'the returned data should be an array')
+              assert.lengthOf(data, 3, 'the returned array should have 3 elements')
+              done()
+            })
+        })
+        .catch( (err) => {
+          throw err
+        })
+    })
 
-  // Update multiple fields on an issue: PUT request to /api/issues/{project}
+    test('View issues on a project with multiple filters: GET request to /api/issues/{project}', (done) => {
+      let myData = {
+        issue_text: 'some filtering sample',
+        issue_title: 'Some Filtering Issue',
+      }
+      let project = `my-own-test-project${Date.now().toString().substring(7)}`
+      let url = `/api/issues/${project}`
+      let characters = ['TheMule', 'ThatGaiaLady', 'GaalDornick']
+      chai
+        .request(server)
+        .post(url)
+        .type('json')
+        .send({ ...myData, created_by: 'TheMule', assigned_to: 'Alice' })
+        .then( (res) => {
+          assert.isObject(res.body)
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .post(url)
+            .type('json')
+            .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Bob' })
+            .then( (res) => {
+              assert.isObject(res.body)
+            })
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .post(url)
+            .type('json')
+            .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Alice' })
+            .then( (res) => {
+              assert.isObject(res.body)
+            })
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .post(url)
+            .type('json')
+            .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Bob', open: false })
+            .then( (res) => {
+              assert.isObject(res.body)
+            })
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .post(url)
+            .type('json')
+            .send({ ...myData, created_by: 'GaalDornick', assigned_to: 'Carol' })
+            .then( (res) => {
+              assert.isObject(res.body)
+            })
+        })
+        .then( () => {
+          chai
+            .request(server)
+            .get(url)
+            .query({ created_by: 'ThatGaiaLady', assigned_to: 'Bob', open: true })
+            .end( (err, res) => {
+              let data = res.body
+              assert.isArray(data, 'the returned data should be an array')
+              assert.lengthOf(data, 1, 'the returned array should have 1 elements')
+              done()
+            })
+        })
+        .catch( (err) => {
+          throw err
+        })
+    })
+  })
 
-  // Update an issue with missing _id: PUT request to /api/issues/{project}
+  suite('Testing the PUT method and responses', () => {
 
-  // Update an issue with no fields to update: PUT request to /api/issues/{project}
+    // Update one field on an issue: PUT request to /api/issues/{project}
 
-  // Update an issue with an invalid _id: PUT request to /api/issues/{project}
+    // Update multiple fields on an issue: PUT request to /api/issues/{project}
 
-  // Delete an issue: DELETE request to /api/issues/{project}
+    // Update an issue with missing _id: PUT request to /api/issues/{project}
 
-  // Delete an issue with an invalid _id: DELETE request to /api/issues/{project}
+    // Update an issue with no fields to update: PUT request to /api/issues/{project}
 
-  // Delete an issue with missing _id: DELETE request to /api/issues/{project}
+    // Update an issue with an invalid _id: PUT request to /api/issues/{project}
 
+  })
+
+  suite('Testing the DELETE method and responses', () => {
+
+    // Delete an issue: DELETE request to /api/issues/{project}
+
+    // Delete an issue with an invalid _id: DELETE request to /api/issues/{project}
+
+    // Delete an issue with missing _id: DELETE request to /api/issues/{project}
+  
+  })
+  
 });
