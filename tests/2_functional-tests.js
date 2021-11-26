@@ -111,54 +111,48 @@ suite('Functional Tests', function () {
         .post(url)
         .type('json')
         .send({ ...myData, issue_title: 'Harry Potter'})
-        .then( (res) => {
-          assert.isObject(res.body)
-        })
-        .then( () => {
+        .end( (err, res) => {
+          let data = res.body
+          assert.isObject(data, 'issue creation should return an object')
           chai
             .request(server)
             .post(url)
             .type('json')
             .send({ ...myData, issue_title: 'Ron Weasley'})
-            .then( (res) => {
-              assert.isObject(res.body)
-            })
-        })
-        .then( () => {
-          chai
-            .request(server)
-            .post(url)
-            .type('json')
-            .send({ ...myData, issue_title: 'Hermione Granger'})
-            .then( (res) => {
-              assert.isObject(res.body)
-            })
-        })
-        .then( () => {
-          chai
-            .request(server)
-            .get(url)
             .end( (err, res) => {
               let data = res.body
-              assert.isArray(data, 'the returned data should be an array')
-              assert.lengthOf(data, 3, 'the returned array should have 3 elements')
-              data.forEach((issue) => {
-                assert.property(issue, 'issue_title', 'the returned object should contain an "issue_title" property')
-                assert.nestedInclude(characters, issue.issue_title, 'the "issue_title" property should match one of the characters')
-                assert.property(issue, 'issue_text', 'the returned object should contain an "issue_title" property')
-                assert.property(issue, 'created_by', 'the returned object should contain an "created_by" property')
-                assert.property(issue, 'assigned_to', 'the returned object should contain an "assigned_to" property')
-                assert.property(issue, 'status_text', 'the returned object should contain an "status_text" property')
-                assert.property(issue, 'open', 'the returned object should contain an "open" property')
-                assert.property(issue, 'created_on', 'the returned object should contain an "created_on" property')
-                assert.property(issue, 'updated_on', 'the returned object should contain an "updated_on" property')
-                assert.property(issue, '_id', 'the returned object should contain an "_id" property')
-              })
-              done()
+              assert.isObject(data, 'issue creation should return an object')
+              chai
+                .request(server)
+                .post(url)
+                .type('json')
+                .send({ ...myData, issue_title: 'Hermione Granger'})
+                .end( (err, res) => {
+                  let data = res.body
+                  assert.isObject(data, 'issue creation should return an object')
+                  chai
+                    .request(server)
+                    .get(url)
+                    .end( (err, res) => {
+                      let data = res.body
+                      assert.isArray(data, 'the returned data should be an array')
+                      assert.lengthOf(data, 3, 'the returned array should have 3 elements')
+                      data.forEach((issue) => {
+                        assert.property(issue, 'issue_title', 'the returned object should contain an "issue_title" property')
+                        assert.nestedInclude(characters, issue.issue_title, 'the "issue_title" property should match one of the characters')
+                        assert.property(issue, 'issue_text', 'the returned object should contain an "issue_title" property')
+                        assert.property(issue, 'created_by', 'the returned object should contain an "created_by" property')
+                        assert.property(issue, 'assigned_to', 'the returned object should contain an "assigned_to" property')
+                        assert.property(issue, 'status_text', 'the returned object should contain an "status_text" property')
+                        assert.property(issue, 'open', 'the returned object should contain an "open" property')
+                        assert.property(issue, 'created_on', 'the returned object should contain an "created_on" property')
+                        assert.property(issue, 'updated_on', 'the returned object should contain an "updated_on" property')
+                        assert.property(issue, '_id', 'the returned object should contain an "_id" property')
+                      })
+                      done()
+                    })
+                })
             })
-        })
-        .catch( (err) => {
-          throw err
         })
     })
 
@@ -175,63 +169,55 @@ suite('Functional Tests', function () {
         .post(url)
         .type('json')
         .send({ ...myData, created_by: 'TheMule', assigned_to: 'Alice' })
-        .then( (res) => {
-          assert.isObject(res.body)
-        })
-        .then( () => {
+        .end( (err, res) => {
+          let data = res.body
+          assert.isObject(data, 'issue creation should return an object')
           chai
             .request(server)
             .post(url)
             .type('json')
             .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Bob' })
-            .then( (res) => {
-              assert.isObject(res.body)
-            })
-        })
-        .then( () => {
-          chai
-            .request(server)
-            .post(url)
-            .type('json')
-            .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Alice' })
-            .then( (res) => {
-              assert.isObject(res.body)
-            })
-        })
-        .then( () => {
-          chai
-            .request(server)
-            .post(url)
-            .type('json')
-            .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Bob' })
-            .then( (res) => {
-              assert.isObject(res.body)
-            })
-        })
-        .then( () => {
-          chai
-            .request(server)
-            .post(url)
-            .type('json')
-            .send({ ...myData, created_by: 'GaalDornick', assigned_to: 'Carol' })
-            .then( (res) => {
-              assert.isObject(res.body)
-            })
-        })
-        .then( () => {
-          chai
-            .request(server)
-            .get(url)
-            .query({ created_by: 'ThatGaiaLady' })
             .end( (err, res) => {
               let data = res.body
-              assert.isArray(data, 'the returned data should be an array')
-              assert.lengthOf(data, 3, 'the returned array should have 3 elements')
-              done()
+              assert.isObject(data, 'issue creation should return an object')
+              chai
+                .request(server)
+                .post(url)
+                .type('json')
+                .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Alice' })
+                .end( (err, res) => {
+                  let data = res.body
+                  assert.isObject(data, 'issue creation should return an object')
+                  chai
+                    .request(server)
+                    .post(url)
+                    .type('json')
+                    .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Bob' })
+                    .end( (err, res) => {
+                      let data = res.body
+                      assert.isObject(data, 'issue creation should return an object')
+                      chai
+                        .request(server)
+                        .post(url)
+                        .type('json')
+                        .send({ ...myData, created_by: 'GaalDornick', assigned_to: 'Carol' })
+                        .end( (err, res) => {
+                          let data = res.body
+                          assert.isObject(data, 'issue creation should return an object')
+                          chai
+                            .request(server)
+                            .get(url)
+                            .query({ created_by: 'ThatGaiaLady' })
+                            .end( (err, res) => {
+                              let data = res.body
+                              assert.isArray(data, 'the returned data should be an array')
+                              assert.lengthOf(data, 3, 'the returned array should have 3 elements')
+                              done()
+                          })
+                        })
+                    })
+                })
             })
-        })
-        .catch( (err) => {
-          throw err
         })
     })
 
@@ -248,63 +234,55 @@ suite('Functional Tests', function () {
         .post(url)
         .type('json')
         .send({ ...myData, created_by: 'TheMule', assigned_to: 'Alice' })
-        .then( (res) => {
-          assert.isObject(res.body)
-        })
-        .then( () => {
+        .end( (err, res) => {
+          let data = res.body
+          assert.isObject(data, 'issue creation should return an object')
           chai
             .request(server)
             .post(url)
             .type('json')
             .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Bob' })
-            .then( (res) => {
-              assert.isObject(res.body)
-            })
-        })
-        .then( () => {
-          chai
-            .request(server)
-            .post(url)
-            .type('json')
-            .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Alice' })
-            .then( (res) => {
-              assert.isObject(res.body)
-            })
-        })
-        .then( () => {
-          chai
-            .request(server)
-            .post(url)
-            .type('json')
-            .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Bob', open: false })
-            .then( (res) => {
-              assert.isObject(res.body)
-            })
-        })
-        .then( () => {
-          chai
-            .request(server)
-            .post(url)
-            .type('json')
-            .send({ ...myData, created_by: 'GaalDornick', assigned_to: 'Carol' })
-            .then( (res) => {
-              assert.isObject(res.body)
-            })
-        })
-        .then( () => {
-          chai
-            .request(server)
-            .get(url)
-            .query({ created_by: 'ThatGaiaLady', assigned_to: 'Bob', open: true })
             .end( (err, res) => {
               let data = res.body
-              assert.isArray(data, 'the returned data should be an array')
-              assert.lengthOf(data, 1, 'the returned array should have 1 elements')
-              done()
+              assert.isObject(data, 'issue creation should return an object')
+              chai
+                .request(server)
+                .post(url)
+                .type('json')
+                .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Alice' })
+                .end( (err, res) => {
+                  let data = res.body
+                  assert.isObject(data, 'issue creation should return an object')
+                  chai
+                    .request(server)
+                    .post(url)
+                    .type('json')
+                    .send({ ...myData, created_by: 'ThatGaiaLady', assigned_to: 'Bob', open: false })
+                    .end( (err, res) => {
+                      let data = res.body
+                      assert.isObject(data, 'issue creation should return an object')
+                      chai
+                        .request(server)
+                        .post(url)
+                        .type('json')
+                        .send({ ...myData, created_by: 'GaalDornick', assigned_to: 'Carol' })
+                        .end( (err, res) => {
+                          let data = res.body
+                          assert.isObject(data, 'issue creation should return an object')
+                          chai
+                            .request(server)
+                            .get(url)
+                            .query({ created_by: 'ThatGaiaLady', assigned_to: 'Bob', open: true })
+                            .end( (err, res) => {
+                              let data = res.body
+                              assert.isArray(data, 'the returned data should be an array')
+                              assert.lengthOf(data, 1, 'the returned array should have 1 elements')
+                              done()
+                            })
+                        })
+                    })
+                })
             })
-        })
-        .catch( (err) => {
-          throw err
         })
     })
   })
