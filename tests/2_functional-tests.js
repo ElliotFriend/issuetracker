@@ -472,11 +472,71 @@ suite('Functional Tests', function () {
 
   suite('Testing the DELETE method and responses', () => {
 
-    // Delete an issue: DELETE request to /api/issues/{project}
+    test('Delete an issue: DELETE request to /api/issues/{project}', (done) => {
+      let myData = {
+        issue_text: 'deleting issue sample',
+        issue_title: 'Sample Deleting Issue',
+        created_by: 'a dude',
+      }
+      chai
+        .request(server)
+        .post('/api/issues/my-own-test-project')
+        .type('json')
+        .send(myData)
+        .end( (err, res) => {
+          let data = res.body
+          assert.isObject(data, 'the created issue should be returned as an object')
+          chai
+            .request(server)
+            .delete('/api/issues/my-own-test-project')
+            .type('json')
+            .send({
+              _id: data._id,
+            })
+            .end( (err, res) => {
+              let data = res.body
+              let _id = res.request._data._id
+              assert.isObject(data, 'return from a successful DELETE operation should be an object')
+              assert.deepEqual(data, {
+                result: 'successfully deleted',
+                _id: _id,
+              }, 'return object from a DELETE operation should be a success message')
+              done()
+            })
+        })
+    })
 
-    // Delete an issue with an invalid _id: DELETE request to /api/issues/{project}
+    test('Delete an issue with an invalid _id: DELETE request to /api/issues/{project}', (done) => {
+      chai
+        .request(server)
+        .delete('/api/issues/my-own-test-project')
+        .type('json')
+        .send({
+          _id: '5f665eb46e296f6b9b6a504d',
+        })
+        .end( (err, res) => {
+          let data = res.body
+          assert.isObject(data, 'return from a DELETE operation with invalid _id should be an object')
+          assert.deepEqual(data, {
+            error: 'could not delete',
+            _id: '5f665eb46e296f6b9b6a504d',
+          }, 'returned object should contain a helpful error message')
+          done()
+        })
+    })
 
-    // Delete an issue with missing _id: DELETE request to /api/issues/{project}
+    test('Delete an issue with missing _id: DELETE request to /api/issues/{project}', (done) => {
+      chai
+        .request(server)
+        .delete('/api/issues/my-own-test-project')
+        .type('json')
+        .end( (err, res) => {
+          let data = res.body
+          assert.isObject(data, 'return from a DELETE operation with a missing _id should be an object')
+          assert.deepEqual(data, { error: 'missing _id' }, 'returned object should contain a helpful error message')
+          done()
+        })
+    })
   
   })
   
