@@ -2,6 +2,7 @@ const chaiHttp = require('chai-http');
 const chai = require('chai');
 const assert = chai.assert;
 const server = require('../app');
+const { request } = require('chai');
 
 chai.use(chaiHttp);
 
@@ -310,15 +311,162 @@ suite('Functional Tests', function () {
 
   suite('Testing the PUT method and responses', () => {
 
-    // Update one field on an issue: PUT request to /api/issues/{project}
+    test('Update one field on an issue: PUT request to /api/issues/{project}', (done) => {
+      let myData = {
+        issue_text: 'some updating sample',
+        issue_title: 'Some Updating Issue',
+        created_by: 'some guy',
+      }
+      chai
+        .request(server)
+        .post('/api/issues/my-own-test-project')
+        .type('json')
+        .send(myData)
+        .end( (err, res) => {
+          let data = res.body
+          chai
+            .request(server)
+            .put('/api/issues/my-own-test-project')
+            .type('json')
+            .send({
+              _id: data._id,
+              issue_text: 'updated issue text',
+            })
+            .end( (err, res) => {
+              let data = res.body
+              let _id = res.request._data._id
+              assert.isObject(data, 'return from a PUT operation should be an object')
+              assert.deepEqual(data, {
+                result: 'successfully updated',
+                _id: _id,
+              }, 'return object from a PUT operation should be a success message')
+              chai
+                .request(server)
+                .get('/api/issues/my-own-test-project')
+                .query({ _id: _id })
+                .end( (err, res) => {
+                  let data = res.body
+                  assert.isArray(data, 'querying for the updated _id should return an array')
+                  assert.isObject(data[0], 'the returned array should contain an object item')
+                  assert.isAbove(
+                    Date.parse(data[0].updated_on),
+                    Date.parse(data[0].created_on),
+                    'for an updated issue, "updated_on" should be greater than "created_on"',
+                  )
+                  done()
+                })
+            })
+        })
+    })
 
-    // Update multiple fields on an issue: PUT request to /api/issues/{project}
+    test('Update multiple fields on an issue: PUT request to /api/issues/{project}', (done) => {
+      let myData = {
+        issue_text: 'multiple updating sample',
+        issue_title: 'Multiple Updating Issue',
+        created_by: 'many guys',
+      }
+      chai
+        .request(server)
+        .post('/api/issues/my-own-test-project')
+        .type('json')
+        .send(myData)
+        .end( (err, res) => {
+          let data = res.body
+          assert.isObject(data, 'the created issue should be returned as an object')
+          assert.isEmpty(data.assigned_to, 'the initial value of "assigned_to" should be empty')
+          chai
+            .request(server)
+            .put('/api/issues/my-own-test-project')
+            .type('json')
+            .send({
+              _id: data._id,
+              created_by: 'more than one guys',
+              assigned_to: 'sXe Phil',
+            })
+            .end( (err, res) => {
+              let data = res.body
+              let _id = res.request._data._id
+              assert.isObject(data, 'return from a PUT operation should be an object')
+              assert.deepEqual(data, {
+                result: 'successfully updated',
+                _id: _id,
+              }, 'return object from a PUT operation should be a success message')
+              chai
+                .request(server)
+                .get('/api/issues/my-own-test-project')
+                .query({ _id: _id })
+                .end( (err, res) => {
+                  let data = res.body
+                  assert.isArray(data, 'querying for the updated _id should return an array')
+                  assert.isObject(data[0], 'the returned array should contain an object item')
+                  assert.isNotEmpty(data[0].assigned_to, 'the returned property "assigned_to" should now have a value')
+                  assert.isAbove(
+                    Date.parse(data[0].updated_on),
+                    Date.parse(data[0].created_on),
+                    'for an updated issue, "updated_on" should be greater than "created_on"',
+                  )
+                  done()
+                })
+            })
+        })
+    })
 
-    // Update an issue with missing _id: PUT request to /api/issues/{project}
+    test('Update an issue with missing _id: PUT request to /api/issues/{project}', (done) => {
+      chai
+        .request(server)
+        .put('/api/issues/my-own-test-project')
+        .type('json')
+        .send({
+          created_by: 'nobody',
+          issue_text: 'will see this',
+        })
+        .end( (err, res) => {
+          let data = res.body
+          assert.isObject(data, 'return from a bad PUT request should be an object')
+          assert.property(data, 'error', 'the returned object should have an "error" property')
+          assert.equal(data.error, 'missing _id', 'the returned object should contain a helpful error message')
+          done()
+        })
+    })
 
-    // Update an issue with no fields to update: PUT request to /api/issues/{project}
+    test('Update an issue with no fields to update: PUT request to /api/issues/{project}', (done) => {
+      chai
+        .request(server)
+        .put('/api/issues/my-own-test-project')
+        .type('json')
+        .send({
+          _id: '5f665eb46e296f6b9b6a504d',
+        })
+        .end( (err, res) => {
+          let data = res.body
+          assert.isObject(data, 'return from a bad PUT request should be an object')
+          assert.deepEqual(data, {
+            error: 'no update field(s) sent',
+            _id: '5f665eb46e296f6b9b6a504d',
+          }, 'the returned object should contain a helpful error message')
+          done()
+        })
+    })
 
-    // Update an issue with an invalid _id: PUT request to /api/issues/{project}
+    test('Update an issue with an invalid _id: PUT request to /api/issues/{project}', (done) => {
+      chai
+        .request(server)
+        .put('/api/issues/my-own-test-project')
+        .type('json')
+        .send({
+          _id: '5f665eb46e296f6b9b6a504d',
+          issue_text: 'text for non-existing update',
+        })
+        .end( (err, res) => {
+          let data = res.body
+          assert.isObject(data, 'return from a bad PUT request should be an object')
+          assert.deepEqual(data, {
+            error: 'could not update',
+            _id: '5f665eb46e296f6b9b6a504d',
+          }, 'the returned object should contain a less-than-helpful error message')
+          done()
+        })
+    })
 
   })
 
